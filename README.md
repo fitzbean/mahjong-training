@@ -61,13 +61,18 @@ It checks shanten, hand decomposition, win detection (against 20,000 random hand
 waits, and scoring, then simulates full games at each difficulty to confirm the balance
 is sane and no tiles leak. `npm run test:long` runs a larger simulation.
 
-Recent balance run, coached human vs three AI:
+A balance run of 30 games per difficulty, coached human vs three AI:
 
 ```
 gentle    human  57% | ai  33% | draw  10%
 standard  human  50% | ai  47% | draw   3%
 sharp     human  37% | ai  60% | draw   3%
 ```
+
+Samples this small are noisy — individual runs swing by 15–20 points. The number that
+matters is that a coached human beats the 25% an even four-way split would give, and
+that the difficulties order correctly over longer runs. Use `npm run test:long` for
+figures worth quoting.
 
 ---
 
