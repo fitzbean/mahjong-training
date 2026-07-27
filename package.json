@@ -1,0 +1,13 @@
+{
+  "name": "mahjong-dojo",
+  "version": "1.0.0",
+  "description": "A mobile-first app for learning to play mahjong: interactive lessons, generated drills, and a full game against three AI opponents.",
+  "private": true,
+  "scripts": {
+    "test": "node tools/sim.js 40",
+    "test:long": "node tools/sim.js 200",
+    "start": "npx --yes http-server . -p 4189 -c-1"
+  },
+  "keywords": ["mahjong", "learning", "game", "pwa"],
+  "license": "MIT"
+}

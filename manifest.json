@@ -1,0 +1,18 @@
+{
+  "name": "Mahjong Dojo — learn to play",
+  "short_name": "Mahjong Dojo",
+  "description": "Learn to play mahjong with interactive lessons, generated drills, and a full game against three opponents.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1a15",
+  "theme_color": "#12281f",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='96' fill='%230d1a15'/%3E%3Crect x='136' y='96' width='240' height='320' rx='28' fill='%23f6efdd'/%3E%3Ctext x='256' y='330' font-size='210' text-anchor='middle' fill='%23c0392b' font-family='serif' font-weight='700'%3E%E4%B8%AD%3C/text%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

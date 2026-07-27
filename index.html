@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+  <meta name="theme-color" content="#12281f">
+  <meta name="description" content="Learn to play mahjong: interactive lessons, generated drills, and a full game against three opponents.">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Mahjong Dojo — learn to play</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+
+<body class="labels">
+
+  <div id="splash">
+    <div class="splash-in">
+      <div class="splash-tile">🀄</div>
+      <h1>Mahjong Dojo</h1>
+      <p>Learn the real game, one tile at a time</p>
+    </div>
+  </div>
+
+  <div id="app">
+
+    <header id="topbar">
+      <div class="brand">
+        <span class="brand-i">🀄</span>
+        <span class="brand-n">Mahjong Dojo</span>
+      </div>
+      <div class="hdr-right">
+        <span id="hdr-streak" class="streak"></span>
+        <span id="hdr-level" class="lvl">Lv 1</span>
+        <button id="btn-settings" class="icon-btn" type="button" aria-label="Settings">⚙</button>
+      </div>
+      <div class="xpbar"><i id="hdr-xp"></i></div>
+    </header>
+
+    <main id="main">
+
+      <!-- ============ HOME ============ -->
+      <section id="screen-home" class="screen active">
+        <div class="pad">
+          <div id="home-cta" class="cta-wrap"></div>
+
+          <div id="home-stats" class="stats"></div>
+
+          <div class="quick">
+            <button class="quick-b" type="button" data-go="learn" onclick="Learn.renderList();UI.screen('learn')">
+              <span class="q-i">📚</span><span class="q-t">Lessons</span>
+              <span class="q-s">Ten short, interactive steps from zero to playing</span>
+            </button>
+            <button class="quick-b" type="button" onclick="Drills.renderList();UI.screen('drills')">
+              <span class="q-i">⚡</span><span class="q-t">Drills</span>
+              <span class="q-s">Four generated mini-games. Beat your best.</span>
+            </button>
+            <button class="quick-b accent" type="button" id="home-play">
+              <span class="q-i">🀄</span><span class="q-t">Play a hand</span>
+              <span class="q-s">Full game vs three opponents, Coach optional</span>
+            </button>
+            <button class="quick-b" type="button" onclick="Reference.render();UI.screen('guide')">
+              <span class="q-i">📖</span><span class="q-t">Guide</span>
+              <span class="q-s">Every tile, set, and scoring rule</span>
+            </button>
+          </div>
+
+          <div class="tipbox">
+            <span class="tip-k">Tip</span>
+            <p id="home-tip"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ LEARN ============ -->
+      <section id="screen-learn" class="screen">
+        <div class="pad" id="learn-body"></div>
+      </section>
+
+      <!-- ============ LESSON PLAYER ============ -->
+      <section id="screen-lesson" class="screen full">
+        <div class="sub-head">
+          <button id="lesson-quit" class="icon-btn" type="button" aria-label="Close lesson">✕</button>
+          <div class="sh-mid">
+            <span id="lesson-title"></span>
+            <div class="track slim"><i id="lesson-bar"></i></div>
+          </div>
+          <span id="lesson-count" class="sh-count"></span>
+        </div>
+        <div id="lesson-body" class="scroll pad"></div>
+        <div id="lesson-result" class="result"></div>
+      </section>
+
+      <!-- ============ DRILLS ============ -->
+      <section id="screen-drills" class="screen">
+        <div class="pad" id="drills-body"></div>
+      </section>
+
+      <!-- ============ DRILL PLAYER ============ -->
+      <section id="screen-drill" class="screen full">
+        <div class="sub-head">
+          <button id="drill-quit" class="icon-btn" type="button" aria-label="End drill">✕</button>
+          <div class="sh-mid">
+            <span id="drill-title"></span>
+            <div id="drill-meter" class="meter"></div>
+          </div>
+          <div class="sh-score"><b id="drill-score">0</b><span id="drill-streak"></span></div>
+        </div>
+        <div id="drill-body" class="scroll pad">
+          <div id="drill-body-in"></div>
+        </div>
+      </section>
+
+      <!-- ============ PLAY ============ -->
+      <section id="screen-play" class="screen full">
+        <div class="sub-head play-head">
+          <button id="play-quit" class="icon-btn" type="button" aria-label="Leave table">✕</button>
+          <div class="sh-mid tight">
+            <span class="ph-line"><b id="play-round">East round</b> · <span id="play-seat"></span></span>
+            <span class="ph-line muted" id="play-phase">Dealing…</span>
+          </div>
+          <button id="coach-toggle" class="icon-btn on" type="button" aria-label="Toggle coach">🧭</button>
+        </div>
+
+        <div class="table-wrap">
+          <div id="play-seats" class="seats"></div>
+          <div class="felt">
+            <div id="rivers-top" class="rivers"></div>
+            <div class="table-mid">
+              <span class="tm-wall"><b id="play-wall">0</b> left</span>
+              <span class="tm-wind" id="play-round-g">東</span>
+              <span class="tm-turn" id="play-turn">—</span>
+            </div>
+            <div id="rivers-bot" class="rivers"></div>
+          </div>
+        </div>
+
+        <div class="mine">
+          <div id="play-coach" class="coach"></div>
+          <div id="play-hand" class="hand-wrap"></div>
+          <div id="play-actions" class="actions"></div>
+        </div>
+      </section>
+
+      <!-- ============ GUIDE ============ -->
+      <section id="screen-guide" class="screen">
+        <div class="pad" id="ref-body"></div>
+      </section>
+
+    </main>
+
+    <nav id="tabbar">
+      <button class="tab on" type="button" data-go="home"><span>🏠</span>Home</button>
+      <button class="tab" type="button" data-go="learn"><span>📚</span>Learn</button>
+      <button class="tab" type="button" data-go="drills"><span>⚡</span>Drills</button>
+      <button class="tab" type="button" data-go="play"><span>🀄</span>Play</button>
+      <button class="tab" type="button" data-go="guide"><span>📖</span>Guide</button>
+    </nav>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <div id="modal-root"></div>
+
+  <script src="js/tiles.js"></script>
+  <script src="js/rules.js"></script>
+  <script src="js/game.js"></script>
+  <script src="js/lessons.js"></script>
+  <script src="js/store.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/learn.js"></script>
+  <script src="js/drills.js"></script>
+  <script src="js/play.js"></script>
+  <script src="js/reference.js"></script>
+  <script src="js/app.js"></script>
+</body>
+
+</html>
