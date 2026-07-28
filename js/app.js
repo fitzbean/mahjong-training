@@ -29,25 +29,30 @@
 
     var lessonsDone = Store.lessonsDoneCount();
     UI.$('#home-stats').innerHTML =
-      stat(lessonsDone + '/' + LESSONS.length, 'lessons') +
+      stat(lessonsDone + '/' + ALL_LESSONS.length, 'lessons') +
       stat(d.games.won + '/' + d.games.played, 'games won') +
       stat(d.badges.length + '/' + Store.BADGES.length, 'badges') +
       stat(d.xp, 'total XP');
 
-    // Next thing to do
-    var nextLesson = LESSONS.filter(function (L) {
-      return !(d.lessons[L.id] && d.lessons[L.id].done);
-    })[0];
+    // Next thing to do — finish the Chinese track before offering American.
+    var undone = function (L) { return !(d.lessons[L.id] && d.lessons[L.id].done); };
+    var nextLesson = LESSONS.filter(undone)[0] || AM_LESSONS.filter(undone)[0];
+    var isAm = nextLesson && AM_LESSONS.indexOf(nextLesson) >= 0;
 
     var cta = UI.$('#home-cta');
     cta.innerHTML = '';
     if (nextLesson) {
       var b = el('button', 'cta');
       b.type = 'button';
-      b.innerHTML = '<span class="cta-k">' + (lessonsDone ? 'Next lesson' : 'Start here') + '</span>' +
+      b.innerHTML = '<span class="cta-k">' + (isAm ? 'American track' :
+        lessonsDone ? 'Next lesson' : 'Start here') + '</span>' +
         '<span class="cta-t">' + nextLesson.icon + ' ' + nextLesson.title + '</span>' +
         '<span class="cta-s">' + nextLesson.sub + '</span>';
-      b.addEventListener('click', function () { UI.sound('click'); Learn.start(nextLesson); });
+      b.addEventListener('click', function () {
+        UI.sound('click');
+        Learn.showTrack(isAm ? 'am' : 'cn');
+        Learn.start(nextLesson);
+      });
       cta.appendChild(b);
     } else {
       var b2 = el('button', 'cta');
@@ -155,10 +160,7 @@
         if (go === 'learn') Learn.renderList();
         if (go === 'drills') Drills.renderList();
         if (go === 'guide') Reference.render();
-        if (go === 'play') {
-          if (Play.active()) { UI.screen('play', { immersive: true }); return; }
-          return startPlayPrompt();
-        }
+        if (go === 'play') return startPlayPrompt();
         if (go === 'home') refreshHome();
         UI.screen(go);
       });
@@ -169,6 +171,8 @@
     UI.$('#drill-quit').addEventListener('click', Drills.quit);
     UI.$('#play-quit').addEventListener('click', Play.quit);
     UI.$('#coach-toggle').addEventListener('click', Play.toggleCoach);
+    UI.$('#am-quit').addEventListener('click', AmPlay.quit);
+    UI.$('#am-card-btn').addEventListener('click', AmPlay.openCard);
     UI.$('#home-play').addEventListener('click', function () { UI.sound('click'); startPlayPrompt(); });
 
     UI.setLeaveHandler('drill', Drills.stop);
@@ -181,6 +185,7 @@
         if (cur.id === 'screen-lesson') Learn.quit();
         else if (cur.id === 'screen-drill') Drills.quit();
         else if (cur.id === 'screen-play') Play.quit();
+        else if (cur.id === 'screen-am') AmPlay.quit();
       }
     });
   }
@@ -189,24 +194,56 @@
     if (Play.active()) {
       return UI.modal({
         title: 'Game in progress',
-        body: '<p>You already have a hand going.</p>',
+        body: '<p>You have a Chinese hand going.</p>',
         actions: [
           { label: 'Resume', cls: 'primary', onClick: function () { UI.screen('play', { immersive: true }); } },
-          { label: 'New hand', onClick: function () { Play.newGame(); } }
+          { label: 'New game', onClick: function () { chooseMode(); } }
         ]
       });
     }
+    if (AmPlay.active()) {
+      return UI.modal({
+        title: 'Game in progress',
+        body: '<p>You have an American hand going.</p>',
+        actions: [
+          { label: 'Resume', cls: 'primary', onClick: function () { UI.screen('am', { immersive: true }); } },
+          { label: 'New game', onClick: function () { chooseMode(); } }
+        ]
+      });
+    }
+    chooseMode();
+  }
+
+  function chooseMode() {
     var s = Store.settings();
-    UI.modal({
-      title: 'Play a hand',
-      body: '<p>You versus three opponents. Draw, discard, claim what helps, and call Mahjong when you get there.</p>' +
-        '<p class="muted small">Coach is currently <strong>' + (s.coach ? 'on' : 'off') + '</strong> and opponents are set to <strong>' +
-        s.difficulty + '</strong>. Change either in Settings.</p>',
-      actions: [
-        { label: 'Not now' },
-        { label: 'Deal', cls: 'primary', onClick: function () { Play.newGame(); } }
-      ]
-    });
+    var body = el('div', 'modes');
+
+    body.appendChild(el('div', '', UI.vsBlock()));
+
+    var cn = el('button', 'mode');
+    cn.type = 'button';
+    cn.innerHTML = '<span class="mode-i">🀄</span>' +
+      '<span class="mode-t">Chinese Mahjong</span>' +
+      '<span class="mode-s">136 tiles. Make <em>any</em> four sets and a pair — pungs, chows, ' +
+      'whatever the tiles give you. The classic game; start here if you are new.</span>';
+    cn.addEventListener('click', function () { close(); Play.newGame(); });
+
+    var am = el('button', 'mode');
+    am.type = 'button';
+    am.innerHTML = '<span class="mode-i">🃏</span>' +
+      '<span class="mode-t">American Mahjong</span>' +
+      '<span class="mode-s">152 tiles with jokers. Pass in the Charleston, then match <em>one ' +
+      'exact hand</em> from the card. No chows, no improvising. Do the lessons first.</span>';
+    am.addEventListener('click', function () { close(); AmPlay.newGame(); });
+
+    body.appendChild(cn);
+    body.appendChild(am);
+    body.appendChild(el('p', 'muted small centre',
+      'Coach <strong>' + (s.coach ? 'on' : 'off') + '</strong> · opponents <strong>' +
+      s.difficulty + '</strong> · change in Settings'));
+
+    var m = UI.modal({ title: 'Which game?', body: body, actions: [{ label: 'Not now' }] });
+    function close() { m.close(); }
   }
 
   function boot() {

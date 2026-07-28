@@ -495,6 +495,228 @@
     }
   ];
 
+  /* ============================================================
+     American mahjong — a separate track, unlocked on its own
+     ============================================================ */
+  var J = 35, FL = 34;
+
+  var AM_LESSONS = [
+    {
+      id: 'am-what', title: 'A Different Game', sub: 'Why American is not a variant', icon: '🗽',
+      steps: [
+        {
+          type: 'info',
+          text: 'American mahjong shares its tiles with the Chinese game and almost nothing else.\n\nHere is the whole difference:\n\n# Chinese: you invent the hand.\n\nAny four sets plus a pair wins. Nothing is written down anywhere. You look at your tiles, decide what they could become, and change your mind every turn as new ones arrive.'
+        },
+        {
+          type: 'info',
+          text: '# American: you copy a hand.\n\nEvery year the National Mah Jongg League prints a **card** listing the exact hands that are legal that year — around fifty of them. Your fourteen tiles must match one of those lines **exactly**.\n\nNot "close to". Exactly.'
+        },
+        {
+          type: 'info',
+          text: 'So the whole skill inverts.\n\n• **Chinese** — you read your *tiles* and ask what they could become. The answer is open-ended.\n• **American** — you read the *card* and ask which line your tiles are nearest. The answers are a fixed list.\n\nThere is no shanten here. The only question is: how many tiles am I from *this specific printed hand*?'
+        },
+        {
+          type: 'info',
+          text: 'The set grows too. **152 tiles**, not 136:\n\n• the usual 136\n• **8 flowers** — in this game they are ordinary tiles that hands ask for, not bonuses\n• **8 jokers** — the wildcard that changes everything',
+          tiles: [FL, FL, J, J]
+        },
+        {
+          type: 'choice',
+          q: 'You build three chows and a pung with a tidy pair — a clean win in the Chinese game. It is not printed on the card. What is it worth in American mahjong?',
+          tiles: tt('123m 456m 789m 111z 55p'), wide: true,
+          options: ['A standard win', 'Nothing — it is not a legal hand'],
+          answer: 1,
+          why: 'This is the hardest habit to unlearn. In Chinese mahjong that hand wins outright. In American mahjong it is fourteen loose tiles, because no line of the card says that. Beginners lose whole games building something elegant and unplayable.'
+        },
+        {
+          type: 'choice',
+          q: 'Which of these does American mahjong have no use for at all?',
+          tiles: tt('456p'),
+          options: ['Pungs', 'Chows — runs of three different tiles', 'Pairs'],
+          answer: 1,
+          why: 'There is no chow in American mahjong. Card hands do use consecutive numbers, but always as *groups of matching tiles* — three 4s, three 5s, three 6s — never as a run of three different tiles. You will never claim a discard to make one.'
+        },
+        {
+          type: 'info',
+          text: 'One more thing worth knowing up front: the official NMJL card is **copyrighted** and reissued every year.\n\nThis app therefore uses an **original card** written in the same style — same categories, same shapes, same skills — so nothing here reproduces the real one. Learn on this, then buy the current card to play for real.'
+        }
+      ]
+    },
+
+    {
+      id: 'am-joker', title: 'Jokers', sub: 'The wildcard and its one limit', icon: '🃏',
+      steps: [
+        {
+          type: 'info',
+          text: 'A **joker** stands in for any tile — but only inside a group of **three or more**.',
+          tiles: [J]
+        },
+        {
+          type: 'info',
+          text: 'So a joker is welcome in a pung, a kong, or a quint:',
+          tiles: tt('5p 5p').concat([J]),
+          caption: 'A legal pung of 5 Dots'
+        },
+        {
+          type: 'choice',
+          q: 'Your hand needs a **pair** of flowers and you hold one flower and a joker. Are you there?',
+          tiles: [FL, J],
+          options: ['Yes — the joker fills the pair', 'No — jokers cannot be used in a pair'],
+          answer: 1,
+          why: 'Never in a pair, never as a single. This is why the "Singles and Pairs" hands on the card pay so much: no joker can ever help you.'
+        },
+        {
+          type: 'choice',
+          q: 'A card hand asks for **five** of the same tile. Only four exist. How?',
+          options: ['It is a misprint', 'A joker makes up the fifth', 'You use a flower'],
+          answer: 1,
+          why: 'Quints are impossible without jokers. Reaching for one is a bet that you will find them.'
+        },
+        {
+          type: 'info',
+          text: 'Two rules that follow from jokers being precious:\n\n• You may **never pass a joker** during the Charleston.\n• A **discarded joker is dead** — nobody may claim it. Throwing one away is close to unthinkable.'
+        },
+        {
+          type: 'info',
+          text: '**Joker redemption.** If a player has exposed a set containing a joker, and you hold the real tile it stands for, you may swap on your turn: give the tile, take the joker.\n\nExposing a joker is therefore a small risk. Sometimes worth it, sometimes not.'
+        },
+        {
+          type: 'choice',
+          q: 'You are one tile short and holding a spare joker. Which hand should you steer toward?',
+          options: [
+            'A Singles and Pairs hand worth 50',
+            'A hand with a kong the joker can complete'
+          ],
+          answer: 1,
+          why: 'A joker is worth nothing to a singles-and-pairs hand. Let the tiles you actually hold pick the target.'
+        }
+      ]
+    },
+
+    {
+      id: 'am-charleston', title: 'The Charleston', sub: 'Passing before play begins', icon: '🔀',
+      steps: [
+        {
+          type: 'info',
+          text: 'Before anyone draws a tile, everyone passes tiles around. It is called the **Charleston**, and it has no equivalent in Chinese mahjong.\n\nThree tiles at a time, all four players at once.'
+        },
+        {
+          type: 'info',
+          text: 'The first Charleston is three passes:\n\n• 3 tiles **right**\n• 3 tiles **across**\n• 3 tiles **left**\n\nThen, if **all four** players agree, a second Charleston runs the other way: left, across, right. Any one player can stop it.'
+        },
+        {
+          type: 'info',
+          text: 'Finally an optional **courtesy pass** with the player across: you each name a number from 0 to 3, and the smaller number is what you swap.\n\nOnly then does the dealer discard and real play start.'
+        },
+        {
+          type: 'choice',
+          q: 'You are dealt three jokers. What do you pass?',
+          options: ['The jokers — they are worth a lot in trade', 'Anything else. Jokers may never be passed'],
+          answer: 1,
+          why: 'It is a hard rule, not a strategy. Jokers stay with whoever is dealt them.'
+        },
+        {
+          type: 'choice',
+          q: 'Why is the Charleston strategically dangerous?',
+          options: [
+            'You might pass a tile you need later',
+            'What you pass tells the table what you are not collecting',
+            'Both of these'
+          ],
+          answer: 2,
+          why: 'Three winds passed left says "I am not going for winds" as loudly as anything. Good players read the passes and remember them all hand.'
+        },
+        {
+          type: 'info',
+          text: 'The practical advice for your first games:\n\n• Open the card **before** you pass anything. Find two or three hands your tiles lean toward.\n• Pass what fits none of them.\n• Do not commit too early — the second Charleston can change everything.'
+        }
+      ]
+    },
+
+    {
+      id: 'am-play', title: 'Calling & Exposing', sub: 'How American turns work', icon: '📣',
+      steps: [
+        {
+          type: 'info',
+          text: 'Play looks familiar — draw a tile, discard a tile, round and round. What changes is **claiming**.'
+        },
+        {
+          type: 'info',
+          text: 'You may claim a discard from **anyone** at the table. No left-hand-neighbour rule, because there are no chows to make.\n\nBut you may only claim to make an **exposure**: three or more matching tiles that form a group in the hand you are chasing. You put it face up on your rack, and it is locked there.'
+        },
+        {
+          type: 'choice',
+          q: 'You hold 4-5 Dots and someone discards 6 Dots. Can you call it?',
+          tiles: tt('4p 5p'),
+          options: ['Yes — that is a run', 'No — there is no such thing as a chow here'],
+          answer: 1,
+          why: 'Card hands do contain consecutive numbers, but they appear as *groups of like tiles* — three 4s, three 5s, three 6s. You never claim a discard to make a run of three different tiles.'
+        },
+        {
+          type: 'choice',
+          q: 'What does exposing a set cost you?',
+          options: [
+            'Nothing, it is free information',
+            'Flexibility — you are now committed to hands containing that set'
+          ],
+          answer: 1,
+          why: 'And the table can see it. Three exposed dragons tell everyone exactly which line of the card you are on, and they will stop feeding you.'
+        },
+        {
+          type: 'info',
+          text: 'When your fourteenth tile completes a card hand you call **Mah Jongg** and expose everything.\n\nIf you call it and you are wrong, that is a dead hand — you are out for the rest of the round. Count twice before you call.'
+        },
+        {
+          type: 'info',
+          text: '**Payment** works differently too:\n\n• The hand has a printed value on the card.\n• If you **self-pick** the winning tile, all three players pay double.\n• Otherwise whoever **threw** the tile pays double, and the other two pay single.\n\nSo discarding into a big exposed hand is genuinely expensive. Watch the racks.'
+        }
+      ]
+    },
+
+    {
+      id: 'am-card', title: 'Reading the Card', sub: 'Choosing a target', icon: '🗂️',
+      steps: [
+        {
+          type: 'info',
+          text: 'The card is grouped into **categories** — families of hands built on one idea. This app\'s card uses the classic ones:\n\n• **2026** — the year, using the White Dragon as a zero\n• **2468** and **13579** — even and odd numbers\n• **Like Numbers** — the same number across suits\n• **Consecutive Run** — runs of adjacent numbers\n• **369**, **Winds & Dragons**, **Quints**, **Singles & Pairs**'
+        },
+        {
+          type: 'info',
+          text: 'One convention runs through all of it: each suit has a **matching dragon**.\n\n• Craks (Characters) go with the **Red** dragon\n• Bams (Bamboo) go with the **Green** dragon\n• Dots go with the **White** dragon — the "soap"\n\nWhen a card line says "DDD" next to a suit, it means that suit\'s dragon.',
+          tiles: tt('1m 7z 1s 6z 1p 5z'), wide: true
+        },
+        {
+          type: 'choice',
+          q: 'A hand reads "FF 2222 4444 6666 — any one suit". You hold four 2 Bams and three 4 Bams. What suit are you in?',
+          options: ['Bams, and you need one more 4 plus four 6s and two flowers', 'Any suit you like'],
+          answer: 0,
+          why: '"Any one suit" means you choose which — but once your tiles are in Bams, the whole hand is Bams. Mixing suits breaks it.'
+        },
+        {
+          type: 'choice',
+          q: 'Why does the White Dragon appear in the 2026 hands?',
+          options: [
+            'It is a wildcard there',
+            'Its blank face reads as a zero'
+          ],
+          answer: 1,
+          why: 'Players call it the "soap" and read it as 0. It is how the card writes years like 2026 with tiles.'
+        },
+        {
+          type: 'info',
+          text: 'How strong players actually use the card:\n\n• After the deal, find **two or three** plausible hands, never one.\n• Prefer hands where jokers can help — anything with kongs and quints.\n• Note the value, but do not chase a 50-point hand with tiles that do not support it.\n• Keep re-reading. The right hand at tile 5 is often the wrong one by tile 20.'
+        },
+        {
+          type: 'info',
+          text: '# You are ready.\n\nHit **Play** and choose American. The card is one tap away at the table, and it shows your distance to every hand — use it constantly at first, then less and less.'
+        }
+      ]
+    }
+  ];
+
   global.LESSONS = LESSONS;
+  global.AM_LESSONS = AM_LESSONS;
+  global.ALL_LESSONS = LESSONS.concat(AM_LESSONS);
   global.tt = tt;
 })(window);

@@ -15,8 +15,14 @@
   var HONOR_SHORT = ['E', 'S', 'W', 'N', 'Wh', 'Gr', 'Rd'];
   var CJK = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九'];
 
-  function suitOf(i) { return i < 9 ? 'm' : i < 18 ? 'p' : i < 27 ? 's' : 'z'; }
-  function rankOf(i) { return i < 27 ? (i % 9) + 1 : i - 26; }
+  // American mahjong adds two kinds beyond the 34: flowers (8 copies, all
+  // interchangeable) and jokers (8 copies). 136 + 8 + 8 = 152 tiles.
+  var FLOWER = 34, JOKER = 35;
+
+  function suitOf(i) {
+    return i < 9 ? 'm' : i < 18 ? 'p' : i < 27 ? 's' : i < 34 ? 'z' : i === 34 ? 'f' : 'j';
+  }
+  function rankOf(i) { return i < 27 ? (i % 9) + 1 : i < 34 ? i - 26 : 0; }
   function idx(suit, rank) {
     return suit === 'm' ? rank - 1 : suit === 'p' ? 8 + rank : suit === 's' ? 17 + rank : 26 + rank;
   }
@@ -29,10 +35,14 @@
   function isMajor(i) { return isHonor(i) || isTerminal(i); }
 
   function name(i) {
+    if (i === FLOWER) return 'Flower';
+    if (i === JOKER) return 'Joker';
     if (i >= 27) return HONOR_NAMES[i - 27];
     return rankOf(i) + ' ' + SUIT_NAMES[suitOf(i)];
   }
   function short(i) {
+    if (i === FLOWER) return 'Fl';
+    if (i === JOKER) return 'Jk';
     if (i >= 27) return HONOR_SHORT[i - 27];
     return rankOf(i) + suitOf(i).toUpperCase();
   }
@@ -166,6 +176,38 @@
     return '';
   }
 
+  /* ---------- Flower & Joker (American set) ---------- */
+  function faceFlower() {
+    var pet = '';
+    for (var a = 0; a < 5; a++) {
+      var ang = a * 72 - 90;
+      var x = 30 + Math.cos(ang * Math.PI / 180) * 13;
+      var y = 40 + Math.sin(ang * Math.PI / 180) * 13;
+      pet += '<ellipse cx="' + x.toFixed(1) + '" cy="' + y.toFixed(1) +
+        '" rx="8" ry="10.5" fill="' + C.red + '" opacity=".9" transform="rotate(' +
+        (ang + 90).toFixed(1) + ' ' + x.toFixed(1) + ' ' + y.toFixed(1) + ')"/>';
+    }
+    return '<g>' + pet +
+      '<circle cx="30" cy="40" r="6.5" fill="' + C.gold + '"/>' +
+      '<path d="M30 54 q3 12 -6 20" stroke="' + C.green + '" stroke-width="3" fill="none" stroke-linecap="round"/>' +
+      '<ellipse cx="20" cy="68" rx="7" ry="3.6" fill="' + C.green + '" transform="rotate(-24 20 68)"/>' +
+      '</g>';
+  }
+
+  function faceJoker() {
+    return '<g>' +
+      '<path d="M15 34 L21 17 L30 27 L39 17 L45 34 Z" fill="#7c4bb5"/>' +
+      '<circle cx="21" cy="16" r="3.4" fill="' + C.gold + '"/>' +
+      '<circle cx="30" cy="25" r="3.4" fill="' + C.gold + '"/>' +
+      '<circle cx="39" cy="16" r="3.4" fill="' + C.gold + '"/>' +
+      '<rect x="13" y="34" width="34" height="6" rx="3" fill="#5d3690"/>' +
+      '<text x="30" y="58" font-size="11.5" text-anchor="middle" fill="#5d3690"' +
+      ' font-family="Inter,Arial,sans-serif" font-weight="800" letter-spacing="0.5">JOKER</text>' +
+      '<text x="30" y="72" font-size="10" text-anchor="middle" fill="' + C.red +
+      '" font-family="Inter,Arial,sans-serif" font-weight="700">WILD</text>' +
+      '</g>';
+  }
+
   var faceCache = {};
   /** Inner SVG markup for a tile face, cached. */
   function faceSVG(i) {
@@ -174,6 +216,8 @@
     if (s === 'm') inner = faceChar(r);
     else if (s === 'p') inner = faceDots(r);
     else if (s === 's') inner = faceBamboo(r);
+    else if (s === 'f') inner = faceFlower();
+    else if (s === 'j') inner = faceJoker();
     else inner = faceHonor(r);
     faceCache[i] = '<svg class="tf" viewBox="0 0 60 84" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' + inner + '</svg>';
     return faceCache[i];
@@ -211,11 +255,19 @@
     return '<span class="tile back ' + (cls || '') + '"><span class="bk"></span></span>';
   }
 
-  var ALL = [];
-  for (var k = 0; k < 34; k++) ALL.push(k);
+  var ALL = [], ALL_AM = [];
+  for (var k = 0; k < 34; k++) { ALL.push(k); ALL_AM.push(k); }
+  ALL_AM.push(FLOWER, JOKER);
+
+  /**
+   * American play pairs each suit with a dragon: Craks with Red, Bams with
+   * Green, Dots with White ("soap"). Card hands lean on this constantly.
+   */
+  var SUIT_DRAGON = { m: 33, s: 32, p: 31 };
 
   global.T = {
-    ALL: ALL, SUIT_NAMES: SUIT_NAMES, HONOR_NAMES: HONOR_NAMES, COLORS: C,
+    ALL: ALL, ALL_AM: ALL_AM, FLOWER: FLOWER, JOKER: JOKER, SUIT_DRAGON: SUIT_DRAGON,
+    SUIT_NAMES: SUIT_NAMES, HONOR_NAMES: HONOR_NAMES, COLORS: C,
     suitOf: suitOf, rankOf: rankOf, idx: idx,
     isHonor: isHonor, isWind: isWind, isDragon: isDragon,
     isTerminal: isTerminal, isSimple: isSimple, isMajor: isMajor,

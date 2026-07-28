@@ -18,12 +18,13 @@ const ctx = vm.createContext({ console, JSON, Math, Date, performance });
 ctx.window = ctx;
 ctx.globalThis = ctx;
 
-['tiles.js', 'rules.js', 'game.js', 'lessons.js'].forEach(function (f) {
-  const src = fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8');
-  vm.runInContext(src, ctx, { filename: 'js/' + f });
-});
+['tiles.js', 'rules.js', 'game.js', 'lessons.js',
+  'american-card.js', 'american-game.js'].forEach(function (f) {
+    const src = fs.readFileSync(path.join(__dirname, '..', 'js', f), 'utf8');
+    vm.runInContext(src, ctx, { filename: 'js/' + f });
+  });
 
-const { T, R, Game, tt } = ctx;
+const { T, R, Game, tt, AmCard, AmGame } = ctx;
 
 let failures = 0;
 function ok(cond, label, detail) {
@@ -113,6 +114,184 @@ console.log('\n--- scoring ---');
   const chowy = R.score(R.decompose(R.counts(tt('123m 456m 789s 234p 55p')), 0),
     { seatWind: 1, roundWind: 0, concealed: true });
   ok(chowy.total <= plain.total, 'all-chow hand scores at or below a pung hand', chowy.total);
+})();
+
+/* ============================================================
+   1b. American mahjong
+   ============================================================ */
+console.log('\n--- american: card integrity ---');
+(function () {
+  let bad = [];
+  AmCard.CARD.forEach(function (h) {
+    if (h.size !== 14) bad.push(h.id + ' is ' + h.size + ' tiles');
+    let resolvable = false;
+    const hi = h.maxOff >= 0 ? 9 - h.maxOff : 1;
+    h.assigns.forEach(function (a) {
+      for (let n = 1; n <= hi; n++) {
+        if (h.g.every(function (g) { return AmCard.resolve(g[1], a, n) >= 0; })) resolvable = true;
+      }
+    });
+    if (!resolvable) bad.push(h.id + ' never resolves');
+  });
+  ok(bad.length === 0, AmCard.CARD.length + ' hands, all exactly 14 tiles and resolvable',
+    bad.join('; '));
+  ok(AmCard.CATEGORIES.length >= 8, AmCard.CATEGORIES.length + ' categories');
+})();
+
+console.log('\n--- american: joker rules ---');
+(function () {
+  const F = T.FLOWER, J = T.JOKER;
+  const m = function (r) { return T.idx('m', r); };
+  const C = AmCard.counts36;
+
+  const kong = [F, F, m(2), m(2), m(2), m(2), m(4), m(4), m(4), m(4), m(6), m(6), m(6), m(6)];
+  ok(!!AmCard.isMahjong(C(kong)), 'exact hand wins');
+
+  const withJoker = kong.slice(); withJoker[2] = J;
+  ok(!!AmCard.isMahjong(C(withJoker)), 'joker completes a kong');
+
+  const jokerInPair = kong.slice(); jokerInPair[0] = J;
+  ok(!AmCard.isMahjong(C(jokerInPair)), 'joker is REFUSED by a pair');
+
+  const singles = [m(2), m(4), m(6), m(8), T.idx('p', 2), T.idx('p', 4), T.idx('p', 6),
+  T.idx('p', 8), T.idx('s', 2), T.idx('s', 4), T.idx('s', 6), T.idx('s', 8), F, F];
+  ok(!!AmCard.isMahjong(C(singles)), 'all-singles hand wins with real tiles');
+  const singlesJ = singles.slice(); singlesJ[0] = J;
+  ok(!AmCard.isMahjong(C(singlesJ)), 'joker is REFUSED by a single');
+
+  // Quints are impossible without jokers: only 4 of any tile exist.
+  const quint = [30, 30, 30, 30, J, 28, 28, 28, 28, J, m(1), m(1), m(1), m(1)];
+  ok(!!AmCard.isMahjong(C(quint)), 'quint hand wins using two jokers');
+
+  ok(AmCard.rateDiscards(C(withJoker), null).every(function (r) { return r.tile !== J; }),
+    'a joker is never offered as a discard');
+})();
+
+console.log('\n--- american: 14-tile invariant ---');
+(function () {
+  let bad = 0;
+  for (let i = 0; i < 400; i++) {
+    const w = [];
+    for (let a = 0; a < 34; a++) for (let b = 0; b < 4; b++) w.push(a);
+    for (let f = 0; f < 8; f++) w.push(T.FLOWER);
+    for (let j = 0; j < 8; j++) w.push(T.JOKER);
+    AmGame.shuffle(w);
+    const c = AmCard.counts36(w.slice(0, 14));
+    const r = AmCard.rank(c, null);
+    if (!r.length) { bad++; continue; }
+    // distance can never exceed the hand size
+    if (r[0].missing < 0 || r[0].missing > 14) bad++;
+    // a claimed win must really be 14 tiles
+    if (AmCard.isMahjong(c, null) && r[0].missing !== 0) bad++;
+  }
+  ok(bad === 0, '400 random 14-tile hands rank sanely', bad + ' bad');
+})();
+
+/* ---- full American games ---- */
+function playAmerican(difficulty, dealer) {
+  const G = AmGame.create({ difficulty: difficulty, dealer: dealer });
+
+  // Charleston: three passes, an optional three more, then a courtesy pass.
+  for (let step = 0; step < 3; step++) {
+    const picks = [0, 1, 2, 3].map(function (p) { return AmGame.aiCharlestonPick(G, p); });
+    AmGame.applyPass(G, picks, AmGame.CHARLESTON[step].dir);
+  }
+  if ([0, 1, 2, 3].every(function (p) { return AmGame.aiWantsSecond(G, p); })) {
+    for (let step = 3; step < 6; step++) {
+      const picks = [0, 1, 2, 3].map(function (p) { return AmGame.aiCharlestonPick(G, p); });
+      AmGame.applyPass(G, picks, AmGame.CHARLESTON[step].dir);
+    }
+  }
+
+  // Sanity: everyone still holds the right number of tiles, no joker escaped.
+  for (let p = 0; p < 4; p++) {
+    const want = p === G.dealer ? 14 : 13;
+    if (G.players[p].hand.length !== want) return { bug: 'p' + p + ' has ' + G.players[p].hand.length };
+  }
+
+  G.phase = 'discard';
+  G.turn = G.dealer;
+  let guard = 0, needDraw = false;
+
+  while (guard++ < 800) {
+    const pi = G.turn;
+    if (needDraw) {
+      if (AmGame.wallLeft(G) <= 0) { AmGame.endWall(G); return { draw: true, G: G }; }
+      AmGame.draw(G, pi);
+    }
+    if (AmGame.canWinNow(G, pi)) {
+      AmGame.declareWin(G, pi, G.players[pi].drawnTile, true, null);
+      return { winner: pi, G: G };
+    }
+    const red = AmGame.aiRedemption(G, pi);
+    if (red) AmGame.applyRedemption(G, pi, red);
+
+    const t = AmGame.aiDiscard(G, pi);
+    if (t === undefined || !AmGame.discard(G, pi, t)) return { bug: 'discard failed p' + pi };
+
+    const claims = AmGame.availableClaims(G);
+    const want = [];
+    for (let p = 0; p < 4; p++) {
+      if (p === G.lastDiscard.from) continue;
+      const d = AmGame.aiClaimDecision(G, p, claims);
+      if (d) want.push(d);
+    }
+    if (want.length) {
+      const from = G.lastDiscard.from;
+      want.sort(function (a, b) {
+        if ((a.type === 'mahjong') !== (b.type === 'mahjong')) return a.type === 'mahjong' ? -1 : 1;
+        return ((a.player - from + 4) % 4) - ((b.player - from + 4) % 4);
+      });
+      const cc = want[0];
+      if (cc.type === 'mahjong') {
+        AmGame.declareWin(G, cc.player, cc.tile, false, from);
+        return { winner: cc.player, G: G };
+      }
+      AmGame.applyClaim(G, cc);
+      needDraw = false;
+      continue;
+    }
+    G.turn = (G.lastDiscard.from + 1) % 4;
+    needDraw = true;
+  }
+  return { stuck: true, G: G };
+}
+
+console.log('\n--- american: full games ---');
+(function () {
+  const N = Math.max(12, Math.min(30, parseInt(process.argv[2], 10) || 20));
+  const r = { win: 0, draw: 0, stuck: 0, bugs: [], leaks: 0, sizes: 0 };
+  const values = [];
+  for (let g = 0; g < N; g++) {
+    const out = playAmerican('standard', g % 4);
+    if (out.bug) { r.bugs.push(out.bug); continue; }
+    if (out.stuck) { r.stuck++; }
+    else if (out.draw) r.draw++;
+    else { r.win++; if (out.G.result) values.push(out.G.result.total); }
+
+    const G = out.G;
+    if (G) {
+      const seen = new Array(36).fill(0);
+      G.players.forEach(function (pl) {
+        pl.hand.forEach(function (x) { seen[x]++; });
+        pl.discards.forEach(function (x) { seen[x]++; });
+        pl.exposures.forEach(function (e) { e.tiles.forEach(function (x) { seen[x]++; }); });
+        // hand size must stay legal all the way to the end
+        const sz = AmGame.handSize(pl);
+        if (!G.over && sz !== 13 && sz !== 14) r.sizes++;
+      });
+      for (let q = 0; q < 36; q++) {
+        const cap = (q === T.FLOWER || q === T.JOKER) ? 8 : 4;
+        if (seen[q] > cap) r.leaks++;
+      }
+    }
+  }
+  ok(r.bugs.length === 0, 'no engine faults across ' + N + ' games', r.bugs.slice(0, 3).join('; '));
+  ok(r.leaks === 0, 'no tile duplication', r.leaks + ' leaks');
+  ok(r.sizes === 0, 'hand sizes stay legal', r.sizes + ' bad');
+  ok(r.stuck === 0, 'every game terminates', r.stuck + ' stuck');
+  console.log('    wins ' + r.win + ' / wall games ' + r.draw +
+    (values.length ? ' | median payout ' + values.sort(function (a, b) { return a - b; })[Math.floor(values.length / 2)] : ''));
 })();
 
 /* ============================================================

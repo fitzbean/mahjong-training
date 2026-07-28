@@ -91,6 +91,7 @@
     }
     var t = Game.aiDiscard(G, pi);
     Game.discard(G, pi, t);
+    G.phase = 'resolve';
     render();
     later(afterDiscard, SPEED * 0.6);
   }
@@ -119,6 +120,9 @@
   function humanDiscard(tile) {
     if (!G || G.over || G.turn !== 0 || G.phase !== 'discard') return;
     Game.discard(G, 0, tile);
+    // Block re-entry: without this a fast double-tap discards twice before
+    // afterDiscard resolves, and the second resolution finds no lastDiscard.
+    G.phase = 'resolve';
     selected = null;
     showActions([], false);   // a leftover Kong button must not survive the turn
     UI.sound('click');
@@ -127,7 +131,7 @@
   }
 
   function afterDiscard() {
-    if (!G || G.over) return;
+    if (!G || G.over || !G.lastDiscard) return;
     var claims = Game.availableClaims(G);
     if (!claims.length) return passTurn();
 
@@ -150,7 +154,7 @@
   var PRIORITY = { win: 0, kong: 1, pung: 2, chow: 3 };
 
   function bestClaim(list) {
-    if (!list.length) return null;
+    if (!list.length || !G.lastDiscard) return null;
     var from = G.lastDiscard.from;
     return list.slice().sort(function (a, b) {
       if (PRIORITY[a.type] !== PRIORITY[b.type]) return PRIORITY[a.type] - PRIORITY[b.type];
@@ -183,7 +187,7 @@
   }
 
   function passTurn() {
-    if (!G || G.over) return;
+    if (!G || G.over || !G.lastDiscard) return;
     G.turn = (G.lastDiscard.from + 1) % 4;
     G.phase = 'draw';
     render();
@@ -335,7 +339,7 @@
       box.innerHTML =
         '<div class="seat-top"><span class="seat-name">' + pl.name + '</span>' +
         '<span class="seat-wind">' + R.WIND_NAMES[pl.seat][0] + '</span></div>' +
-        '<div class="seat-hand">' + repeat(T.backHTML('xs'), pl.hand.length) + '</div>' +
+        '<div class="seat-hand">' + repeat(T.backHTML('xs'), Math.min(pl.hand.length, 10)) + '</div>' +
         (melds ? '<div class="seat-melds">' + melds + '</div>' : '');
       wrap.appendChild(box);
     });

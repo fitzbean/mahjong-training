@@ -221,8 +221,27 @@
     return row;
   }
 
+  /**
+   * The single most important thing a learner needs to understand about the
+   * two games. Shown wherever someone might confuse them.
+   */
+  function vsBlock(opts) {
+    opts = opts || {};
+    return '<div class="vsblock">' +
+      '<div class="vs-row cn"><span class="vs-k">Chinese</span>' +
+      '<p><b>You invent the hand.</b> Any four sets plus a pair wins. Nothing is written ' +
+      'down — you build whatever your tiles allow and change your mind as they come.</p></div>' +
+      '<div class="vs-sep"><span>the one real difference</span></div>' +
+      '<div class="vs-row am"><span class="vs-k">American</span>' +
+      '<p><b>You copy a hand.</b> A printed card lists every legal hand for the year. Yours ' +
+      'must match one of them exactly, tile for tile. A beautiful hand that is not on the ' +
+      'card is worth nothing at all.</p></div>' +
+      (opts.tail ? '<p class="vs-tail">' + opts.tail + '</p>' : '') +
+      '</div>';
+  }
+
   global.UI = {
-    $: $, $$: $$, el: el, md: md, esc: esc,
+    $: $, $$: $$, el: el, md: md, esc: esc, vsBlock: vsBlock,
     screen: screen, setLeaveHandler: setLeaveHandler,
     toast: toast, modal: modal, sound: sound, haptic: haptic,
     confetti: confetti, flushRewards: flushRewards, tileRow: tileRow

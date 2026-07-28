@@ -51,7 +51,7 @@
           <div class="quick">
             <button class="quick-b" type="button" data-go="learn" onclick="Learn.renderList();UI.screen('learn')">
               <span class="q-i">📚</span><span class="q-t">Lessons</span>
-              <span class="q-s">Ten short, interactive steps from zero to playing</span>
+              <span class="q-s">Two tracks: Chinese, then American. Interactive from step one.</span>
             </button>
             <button class="quick-b" type="button" onclick="Drills.renderList();UI.screen('drills')">
               <span class="q-i">⚡</span><span class="q-t">Drills</span>
@@ -59,11 +59,11 @@
             </button>
             <button class="quick-b accent" type="button" id="home-play">
               <span class="q-i">🀄</span><span class="q-t">Play a hand</span>
-              <span class="q-s">Full game vs three opponents, Coach optional</span>
+              <span class="q-s">Chinese or American, vs three opponents</span>
             </button>
             <button class="quick-b" type="button" onclick="Reference.render();UI.screen('guide')">
               <span class="q-i">📖</span><span class="q-t">Guide</span>
-              <span class="q-s">Every tile, set, and scoring rule</span>
+              <span class="q-s">Every tile and rule, plus both games side by side</span>
             </button>
           </div>
 
@@ -144,6 +144,39 @@
         </div>
       </section>
 
+      <!-- ============ AMERICAN PLAY ============ -->
+      <section id="screen-am" class="screen full">
+        <div class="sub-head play-head">
+          <button id="am-quit" class="icon-btn" type="button" aria-label="Leave table">✕</button>
+          <div class="sh-mid tight">
+            <span class="ph-line"><b>American</b> · <span id="am-turn">—</span></span>
+            <span class="ph-line muted" id="am-phase">Dealing…</span>
+          </div>
+          <button id="am-card-btn" class="icon-btn" type="button" aria-label="View the card">🃏</button>
+        </div>
+
+        <div id="am-banner" class="am-banner"></div>
+
+        <div class="table-wrap">
+          <div id="am-seats" class="seats"></div>
+          <div class="felt">
+            <div id="am-rivers-top" class="rivers"></div>
+            <div class="table-mid">
+              <span class="tm-wall"><b id="am-wall">0</b> left</span>
+              <span class="tm-wind">🀄</span>
+              <span class="tm-turn">152 tiles</span>
+            </div>
+            <div id="am-rivers-bot" class="rivers"></div>
+          </div>
+        </div>
+
+        <div class="mine">
+          <div id="am-coach" class="coach"></div>
+          <div id="am-hand" class="hand-wrap"></div>
+          <div id="am-actions" class="actions"></div>
+        </div>
+      </section>
+
       <!-- ============ GUIDE ============ -->
       <section id="screen-guide" class="screen">
         <div class="pad" id="ref-body"></div>
@@ -166,12 +199,15 @@
   <script src="js/tiles.js"></script>
   <script src="js/rules.js"></script>
   <script src="js/game.js"></script>
+  <script src="js/american-card.js"></script>
+  <script src="js/american-game.js"></script>
   <script src="js/lessons.js"></script>
   <script src="js/store.js"></script>
   <script src="js/ui.js"></script>
   <script src="js/learn.js"></script>
   <script src="js/drills.js"></script>
   <script src="js/play.js"></script>
+  <script src="js/american-play.js"></script>
   <script src="js/reference.js"></script>
   <script src="js/app.js"></script>
 </body>

@@ -25,7 +25,19 @@
     ['Round wind', 'The wind of the current round. Same bonus, for everyone.'],
     ['River', 'The row of discards in front of a player.'],
     ['Dead wall', 'The last 14 tiles, reserved for kong replacements. Never drawn normally.'],
-    ['Exhaustive draw', 'The wall runs out with nobody winning. The hand is void.']
+    ['Exhaustive draw', 'The wall runs out with nobody winning. The hand is void.'],
+    ['— American terms —', ''],
+    ['The Card', 'The annual list of legal hands. In American mahjong, if it is not on the card it is not a hand.'],
+    ['Charleston', 'The ritual passing of three tiles at a time before play begins.'],
+    ['Joker', 'A wildcard. Fills any group of three or more, never a pair or a single.'],
+    ['Exposure', 'A claimed set placed face up on your rack. It locks you in.'],
+    ['Soap', 'The White Dragon. Its blank face doubles as the digit 0 in year hands.'],
+    ['Craks / Bams / Dots', 'American names for Characters, Bamboo, and Dots.'],
+    ['Quint', 'Five of the same tile — only possible with jokers.'],
+    ['Self-pick', 'Drawing your own winning tile. Everybody pays double.'],
+    ['Wall game', 'The American name for an exhaustive draw.'],
+    ['Redemption', 'Swapping your real tile for a joker sitting in someone\'s exposure.'],
+    ['Dead hand', 'A hand called wrongly, or otherwise illegal. It is out for the round.']
   ];
 
   var SCORING = [
@@ -65,7 +77,8 @@
     show('tiles');
   }
 
-  var TABS = [['tiles', 'Tiles'], ['sets', 'Sets'], ['score', 'Scoring'], ['terms', 'Glossary'], ['badges', 'Badges']];
+  var TABS = [['tiles', 'Tiles'], ['sets', 'Sets'], ['score', 'Scoring'],
+  ['american', 'American'], ['terms', 'Glossary'], ['badges', 'Badges']];
 
   function tabs() {
     var w = el('div', 'segbar');
@@ -161,9 +174,104 @@
     p.appendChild(t);
   };
 
+  var AM_DIFFS = [
+    ['Tiles', '136', '152 — plus 8 flowers and 8 jokers'],
+    ['Goal', 'Any 4 sets + a pair', 'One exact hand printed on the card'],
+    ['Jokers', 'None', 'Wild in groups of 3+, never in a pair or single'],
+    ['Runs (chows)', 'Yes, from your left', 'None at all'],
+    ['Claiming', 'Pung from anyone, chow from left', 'Any discard, from anyone, to expose 3+'],
+    ['Before play', 'Deal and go', 'The Charleston — passing tiles around'],
+    ['Flowers', 'Bonus, replaced', 'Ordinary tiles that hands ask for'],
+    ['Scoring', 'Base points × doubles', 'The value printed next to the hand'],
+    ['Paying', 'Varies by house', 'Thrower pays double; self-pick, everyone does']
+  ];
+
+  VIEWS.american = function (p) {
+    p.appendChild(el('div', '', UI.vsBlock({
+      tail: 'Everything below follows from that one line.'
+    })));
+
+    var warn = el('div', 'tipbox');
+    warn.innerHTML = '<span class="tip-k">About this card</span><p>The National Mah Jongg ' +
+      'League publishes the official card each year and it is copyrighted. This app uses an ' +
+      '<strong>original card</strong> written in the same style, so the skills transfer but no ' +
+      'official hand is reproduced. To play for real, buy the current year\'s card.</p>';
+    p.appendChild(warn);
+
+    p.appendChild(el('h3', 'ref-h', 'How it differs'));
+    var t = el('table', 'sc-table');
+    t.innerHTML = '<tr class="sc-sep"><td></td><td>Chinese</td><td>American</td></tr>' +
+      AM_DIFFS.map(function (r) {
+        return '<tr><td><strong>' + r[0] + '</strong></td><td class="sc-n">' + r[1] +
+          '</td><td class="sc-n">' + r[2] + '</td></tr>';
+      }).join('');
+    p.appendChild(t);
+
+    p.appendChild(el('h3', 'ref-h', 'The two new tiles'));
+    var g = el('div', 'gallery');
+    [[T.FLOWER, 'Flower', '8 in the set, all interchangeable'],
+    [T.JOKER, 'Joker', '8 in the set. Wild in any group of 3+']].forEach(function (x) {
+      var c = el('div', 'gal');
+      c.innerHTML = T.html(x[0]) + '<span class="gal-n"><strong>' + x[1] + '</strong><br>' + x[2] + '</span>';
+      g.appendChild(c);
+    });
+    p.appendChild(g);
+
+    p.appendChild(el('h3', 'ref-h', 'Suit dragons'));
+    p.appendChild(el('p', 'muted small',
+      'Each suit is paired with a dragon. When a card line puts "DDD" beside a suit, this is what it means.'));
+    [['m', 'Craks (Characters)'], ['s', 'Bams (Bamboo)'], ['p', 'Dots']].forEach(function (s) {
+      var row = el('div', 'wait-row');
+      row.appendChild(UI.tileRow([T.idx(s[0], 1), T.SUIT_DRAGON[s[0]]], { small: true }));
+      row.appendChild(el('span', 'wait-x', '<strong>' + s[1] + '</strong> — ' +
+        T.name(T.SUIT_DRAGON[s[0]]) + (s[0] === 'p' ? ' (the "soap", also read as 0)' : '')));
+      p.appendChild(row);
+    });
+
+    p.appendChild(el('h3', 'ref-h', 'The Charleston'));
+    p.appendChild(el('div', 'prose', UI.md(
+      'Before anyone draws, everyone passes three tiles at a time.\n\n' +
+      '• **First Charleston** — right, across, left\n' +
+      '• **Second Charleston** — left, across, right. Optional, and any one player can stop it\n' +
+      '• **Courtesy pass** — 0 to 3 tiles with the player across; the smaller number wins\n\n' +
+      'Jokers may never be passed.')));
+    p.appendChild(el('p', 'muted small',
+      'In a physical game the last pass of each Charleston may be "blind" — you pass tiles you ' +
+      'have not looked at. On a screen you can always see your tiles, so that rule has nothing ' +
+      'to bite on and this app leaves it out.'));
+
+    p.appendChild(el('h3', 'ref-h', 'This app\'s card'));
+    p.appendChild(el('p', 'muted small', AmCard.CARD.length + ' hands across ' +
+      AmCard.CATEGORIES.length + ' categories. "C" marks a hand that must stay concealed to earn its doubled value.'));
+
+    AmCard.CATEGORIES.forEach(function (cat) {
+      p.appendChild(el('h4', 'cat-h', cat));
+      var list = el('div', 'cardlist');
+      AmCard.CARD.filter(function (h) { return h.cat === cat; }).forEach(function (h) {
+        var row = el('div', 'cardrow');
+        var tiles = AmCard.previewTiles(h).map(function (grp) {
+          var out = '';
+          for (var i = 0; i < Math.min(grp.count, 5); i++) out += T.html(grp.tile, 'xs');
+          return '<span class="cardgrp">' + out + '</span>';
+        }).join('');
+        row.innerHTML =
+          '<div class="cardrow-h"><span class="cardrow-l">' + h.label + '</span>' +
+          '<span class="cardrow-val">' + h.value + (h.concealed ? ' · C' : '') + '</span></div>' +
+          '<div class="cardrow-t">' + tiles + '</div>' +
+          (h.note ? '<div class="cardrow-n">' + h.note + '</div>' : '');
+        list.appendChild(row);
+      });
+      p.appendChild(list);
+    });
+    p.appendChild(el('p', 'muted small pad',
+      'Tile colours above are only an example — most lines say "any one suit" or "two suits", ' +
+      'and you choose which when you commit.'));
+  };
+
   VIEWS.terms = function (p) {
     var dl = el('dl', 'gloss');
     GLOSSARY.forEach(function (g) {
+      if (!g[1]) { dl.innerHTML += '<dt class="gloss-sep">' + g[0].replace(/—/g, '').trim() + '</dt>'; return; }
       dl.innerHTML += '<dt>' + g[0] + '</dt><dd>' + g[1] + '</dd>';
     });
     p.appendChild(dl);

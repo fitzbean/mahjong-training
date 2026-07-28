@@ -7,24 +7,69 @@
   var el = UI.el;
 
   /* ---------------- lesson list ---------------- */
+  var TRACKS = [
+    {
+      key: 'cn', name: 'Chinese', get lessons() { return LESSONS; },
+      blurb: '<b>You invent the hand.</b> Any four sets and a pair wins — build whatever the tiles allow.'
+    },
+    {
+      key: 'am', name: 'American', get lessons() { return AM_LESSONS; },
+      blurb: '<b>You copy a hand.</b> A printed card fixes every legal hand; yours must match one exactly.'
+    }
+  ];
+
+  var activeTrack = 'cn';
+
   function renderList() {
     var root = UI.$('#learn-body');
     root.innerHTML = '';
 
+    var total = ALL_LESSONS.length;
     var done = Store.lessonsDoneCount();
     var head = el('div', 'sec-head');
-    head.innerHTML = '<h2>Learn</h2><p class="muted">' + done + ' of ' + LESSONS.length +
-      ' lessons complete · unlock as you go</p>';
+    head.innerHTML = '<h2>Learn</h2><p class="muted">' + done + ' of ' + total +
+      ' lessons complete across both games</p>';
     root.appendChild(head);
 
+    // Track switcher
+    var seg = el('div', 'segbar');
+    TRACKS.forEach(function (tr) {
+      var n = Store.lessonsDoneCount(tr.lessons);
+      var b = el('button', 'seg' + (tr.key === activeTrack ? ' on' : ''),
+        tr.name + ' <span class="seg-n">' + n + '/' + tr.lessons.length + '</span>');
+      b.type = 'button';
+      b.addEventListener('click', function () {
+        activeTrack = tr.key;
+        UI.sound('tap');
+        renderList();
+      });
+      seg.appendChild(b);
+    });
+    root.appendChild(seg);
+
+    var track = TRACKS.filter(function (t) { return t.key === activeTrack; })[0];
+    var lessons = track.lessons;
+    var tdone = Store.lessonsDoneCount(lessons);
+
+    root.appendChild(el('p', 'track-blurb', track.blurb));
+
     var bar = el('div', 'track');
-    bar.innerHTML = '<i style="width:' + Math.round(done / LESSONS.length * 100) + '%"></i>';
+    bar.innerHTML = '<i style="width:' + Math.round(tdone / lessons.length * 100) + '%"></i>';
     root.appendChild(bar);
 
+    if (activeTrack === 'am') {
+      var noteBox = el('div', 'tipbox');
+      noteBox.innerHTML = '<span class="tip-k">Note</span><p>The official National Mah Jongg ' +
+        'League card is copyrighted and reissued yearly. This app teaches with an ' +
+        '<strong>original card</strong> in the same style — same categories, same skills, ' +
+        'no official hand reproduced.</p>';
+      root.appendChild(noteBox);
+    }
+
     var list = el('div', 'cards');
-    LESSONS.forEach(function (L, i) {
+    lessons.forEach(function (L, i) {
       var prog = Store.data.lessons[L.id];
-      var prev = i === 0 ? null : Store.data.lessons[LESSONS[i - 1].id];
+      var prev = i === 0 ? null : Store.data.lessons[lessons[i - 1].id];
       var locked = i > 0 && !(prev && prev.done);
 
       var c = el('button', 'card lesson-card' + (locked ? ' locked' : '') + (prog && prog.done ? ' done' : ''));
@@ -38,7 +83,7 @@
         '<span class="card-side">' + (prog && prog.done ? stars(prog.stars) : '<span class="chev">›</span>') + '</span>';
       if (locked) {
         c.addEventListener('click', function () {
-          UI.toast('Finish “' + LESSONS[i - 1].title + '” first');
+          UI.toast('Finish “' + lessons[i - 1].title + '” first');
           UI.sound('bad');
         });
       } else {
@@ -48,6 +93,8 @@
     });
     root.appendChild(list);
   }
+
+  function showTrack(key) { activeTrack = key; renderList(); }
 
   function stars(n) {
     var s = '';
@@ -397,5 +444,8 @@
     });
   }
 
-  global.Learn = { renderList: renderList, start: start, quit: quit, classify: classify };
+  global.Learn = {
+    renderList: renderList, start: start, quit: quit,
+    classify: classify, showTrack: showTrack
+  };
 })(window);

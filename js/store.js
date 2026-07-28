@@ -28,7 +28,10 @@
     { id: 'closed-book', name: 'Closed Book', icon: '🔒', desc: 'Win with a concealed hand' },
     { id: 'purist', name: 'Purist', icon: '💎', desc: 'Win a flush hand' },
     { id: 'big-hand', name: 'Big Hand', icon: '🐉', desc: 'Win a hand worth 500+' },
-    { id: 'regular', name: 'Regular', icon: '🔥', desc: 'Play on 3 different days' }
+    { id: 'regular', name: 'Regular', icon: '🔥', desc: 'Play on 3 different days' },
+    { id: 'card-shark', name: 'Card Shark', icon: '🃏', desc: 'Win an American hand' },
+    { id: 'joker-wild', name: 'Joker\'s Wild', icon: '🎭', desc: 'Win a Quints hand' },
+    { id: 'globetrotter', name: 'Globetrotter', icon: '🗺️', desc: 'Finish both lesson tracks' }
   ];
 
   var LEVELS = [0, 60, 160, 320, 550, 860, 1260, 1760, 2380, 3140, 4060];
@@ -120,12 +123,18 @@
     data.lessons[id] = cur;
     save();
     award('first-lesson');
-    if (LESSONS.every(function (l) { return data.lessons[l.id] && data.lessons[l.id].done; })) award('scholar');
+    if (trackDone(LESSONS)) award('scholar');
+    if (trackDone(LESSONS) && trackDone(AM_LESSONS)) award('globetrotter');
     return isNew;
   }
 
-  function lessonsDoneCount() {
-    return Object.keys(data.lessons).filter(function (k) { return data.lessons[k].done; }).length;
+  function trackDone(track) {
+    return track.every(function (l) { return data.lessons[l.id] && data.lessons[l.id].done; });
+  }
+
+  function lessonsDoneCount(track) {
+    var list = track || ALL_LESSONS;
+    return list.filter(function (l) { return data.lessons[l.id] && data.lessons[l.id].done; }).length;
   }
 
   function drillResult(id, score) {
@@ -149,7 +158,7 @@
     BADGES: BADGES,
     load: load, save: save, addXP: addXP, award: award, takePending: takePending,
     level: level, levelProgress: levelProgress,
-    lessonDone: lessonDone, lessonsDoneCount: lessonsDoneCount,
+    lessonDone: lessonDone, lessonsDoneCount: lessonsDoneCount, trackDone: trackDone,
     drillResult: drillResult, reset: reset,
     settings: function () { return data.settings; }
   };
