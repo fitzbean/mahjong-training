@@ -34,6 +34,25 @@
     showActions([], false);
     UI.screen('am', { immersive: true });
     render();
+
+    // First time at an American table, say the rule plainly before anything
+    // else happens. It is the one thing that trips up Chinese players.
+    if (!Store.data.seenAmIntro) {
+      Store.data.seenAmIntro = true;
+      Store.save();
+      return UI.modal({
+        title: 'Before you start',
+        body: UI.vsBlock({
+          tail: 'So: pick a line off the card, then collect exactly those tiles. ' +
+            'Tap 🃏 at any time to browse the card and see how far you are from each hand.'
+        }),
+        dismissable: false,
+        actions: [{
+          label: 'Deal me in', cls: 'primary',
+          onClick: function () { later(advanceCharleston, 350); }
+        }]
+      });
+    }
     later(advanceCharleston, 550);
   }
 
@@ -512,12 +531,15 @@
     var lead = info.top[0];
     var main = info.missing === 0
       ? '<b>Complete — declare Mah Jongg!</b>'
-      : '<b>' + info.missing + '</b> tile' + (info.missing === 1 ? '' : 's') + ' from';
+      : '<b>' + info.missing + '</b> from your closest card hand';
 
+    // Name the rule on the table, not just in the lessons: the tiles have to
+    // match a printed line exactly, and that is the whole game.
     var target = lead
       ? '<button type="button" class="target" id="am-target">' +
-      '<span class="target-cat">' + lead.hand.cat + '</span>' +
-      '<span class="target-lab">' + lead.hand.label + '</span></button>'
+      '<span class="target-cat">must match exactly · ' + lead.hand.cat + '</span>' +
+      '<span class="target-lab">' + lead.hand.label + '</span>' +
+      '<span class="target-cta">tap for the full card ›</span></button>'
       : '';
 
     var extra = '';

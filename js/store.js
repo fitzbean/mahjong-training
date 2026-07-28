@@ -12,6 +12,7 @@
     drills: {},         // id -> {best:0, plays:0}
     games: { played: 0, won: 0, bestScore: 0 },
     badges: [],
+    seenAmIntro: false,
     streak: { count: 0, last: null },
     settings: { labels: true, coach: true, sound: true, difficulty: 'standard' }
   };

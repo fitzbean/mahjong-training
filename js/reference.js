@@ -87,8 +87,6 @@
       b.type = 'button';
       b.dataset.k = t[0];
       b.addEventListener('click', function () {
-        UI.$$('.seg', w).forEach(function (x) { x.classList.remove('on'); });
-        b.classList.add('on');
         UI.sound('tap');
         show(t[0]);
       });
@@ -99,8 +97,11 @@
 
   function show(key) {
     var p = UI.$('#ref-pane');
+    if (!p) return;
+    UI.$$('#ref-body .seg').forEach(function (b) { b.classList.toggle('on', b.dataset.k === key); });
     p.innerHTML = '';
     VIEWS[key](p);
+    p.scrollIntoView({ block: 'nearest' });
   }
 
   var VIEWS = {};
@@ -292,5 +293,5 @@
     p.appendChild(g);
   };
 
-  global.Reference = { render: render };
+  global.Reference = { render: render, show: show };
 })(window);

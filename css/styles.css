@@ -1811,6 +1811,72 @@ button.tile:active {
   text-align: center;
 }
 
+/* compact variant, always visible on Home */
+.vs-wrap {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 0;
+  margin-bottom: 16px;
+  background: none;
+  transition: transform .12s;
+}
+
+.vs-wrap:active {
+  transform: scale(.985);
+}
+
+.vsblock.compact {
+  margin-bottom: 0;
+}
+
+.vsblock.compact .vs-row {
+  padding: 9px 12px;
+}
+
+.vsblock.compact .vs-row p {
+  font-size: .79rem;
+  line-height: 1.45;
+}
+
+.vsblock.compact .vs-row b {
+  font-size: .84rem;
+}
+
+.vsblock.compact .vs-k {
+  margin-bottom: 3px;
+}
+
+.vs-head {
+  padding: 7px 12px;
+  background: rgba(0, 0, 0, .3);
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--gold);
+}
+
+.vs-more {
+  display: block;
+  padding: 7px 12px;
+  background: var(--panel);
+  border-top: 1px solid var(--line);
+  font-size: .72rem;
+  font-weight: 700;
+  color: var(--muted);
+  text-align: right;
+}
+
+.target-cta {
+  display: block;
+  font-size: .58rem;
+  font-weight: 700;
+  color: #c9a6f0;
+  opacity: .85;
+  margin-top: 1px;
+}
+
 .track-blurb {
   font-size: .84rem;
   color: #cfdcd4;

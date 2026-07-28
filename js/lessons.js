@@ -506,11 +506,13 @@
       steps: [
         {
           type: 'info',
-          text: 'American mahjong shares its tiles with the Chinese game and almost nothing else.\n\nHere is the whole difference:\n\n# Chinese: you invent the hand.\n\nAny four sets plus a pair wins. Nothing is written down anywhere. You look at your tiles, decide what they could become, and change your mind every turn as new ones arrive.'
+          text: 'American mahjong shares its tiles with the Chinese game and almost nothing else.\n\nHere is the whole difference, in one screen:',
+          vs: true,
+          after: 'Every other rule in this track follows from those two lines.'
         },
         {
           type: 'info',
-          text: '# American: you copy a hand.\n\nEvery year the National Mah Jongg League prints a **card** listing the exact hands that are legal that year — around fifty of them. Your fourteen tiles must match one of those lines **exactly**.\n\nNot "close to". Exactly.'
+          text: 'That card is a real, physical thing. Every year the National Mah Jongg League prints one listing the roughly fifty hands that are legal that year, and everyone at the table buys a copy.\n\nYour fourteen tiles must match one of those lines. Not "close to". **Exactly.**'
         },
         {
           type: 'info',

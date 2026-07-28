@@ -65,6 +65,29 @@
     }
 
     UI.$('#home-tip').textContent = TIPS[Math.floor(Math.random() * TIPS.length)];
+
+    // The single most confusable thing in the app, always on screen.
+    UI.$('#home-vs').innerHTML = UI.vsBlock({ compact: true }) +
+      '<span class="vs-more">What else differs? ›</span>';
+  }
+
+  function explainDifference() {
+    UI.modal({
+      title: 'Chinese vs American',
+      body: UI.vsBlock({
+        tail: 'Everything else — jokers, the Charleston, no chows — follows from that.'
+      }),
+      actions: [
+        {
+          label: 'Full comparison', onClick: function () {
+            Reference.render();
+            UI.screen('guide');
+            Reference.show('american');
+          }
+        },
+        { label: 'Got it', cls: 'primary' }
+      ]
+    });
   }
 
   function stat(v, l) {
@@ -174,6 +197,7 @@
     UI.$('#am-quit').addEventListener('click', AmPlay.quit);
     UI.$('#am-card-btn').addEventListener('click', AmPlay.openCard);
     UI.$('#home-play').addEventListener('click', function () { UI.sound('click'); startPlayPrompt(); });
+    UI.$('#home-vs').addEventListener('click', function () { UI.sound('tap'); explainDifference(); });
 
     UI.setLeaveHandler('drill', Drills.stop);
 

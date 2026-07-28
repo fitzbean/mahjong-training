@@ -227,6 +227,15 @@
    */
   function vsBlock(opts) {
     opts = opts || {};
+    if (opts.compact) {
+      return '<div class="vsblock compact">' +
+        '<div class="vs-head">Two games, one set of tiles</div>' +
+        '<div class="vs-row cn"><span class="vs-k">Chinese</span>' +
+        '<p><b>You invent the hand.</b> Any four sets and a pair. Nothing is written down.</p></div>' +
+        '<div class="vs-row am"><span class="vs-k">American</span>' +
+        '<p><b>You copy a hand.</b> It must match a line on the printed card exactly.</p></div>' +
+        '</div>';
+    }
     return '<div class="vsblock">' +
       '<div class="vs-row cn"><span class="vs-k">Chinese</span>' +
       '<p><b>You invent the hand.</b> Any four sets plus a pair wins. Nothing is written ' +

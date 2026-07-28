@@ -213,10 +213,14 @@
 
   RENDER.info = function (step, body) {
     body.appendChild(el('div', 'prose', UI.md(step.text)));
+    // A side-by-side comparison has to be side by side. Splitting it over two
+    // steps means the reader never sees both halves at once.
+    if (step.vs) body.appendChild(el('div', '', UI.vsBlock()));
     if (step.tiles) {
       body.appendChild(UI.tileRow(step.tiles, { wide: step.wide }));
-      if (step.caption) body.appendChild(el('p', 'caption', step.caption));
     }
+    if (step.caption) body.appendChild(el('p', 'caption', step.caption));
+    if (step.after) body.appendChild(el('div', 'prose', UI.md(step.after)));
     var b = el('button', 'btn primary wide', S.i + 1 >= S.lesson.steps.length ? 'Finish' : 'Got it');
     b.type = 'button';
     b.addEventListener('click', function () { UI.sound('click'); next(); });
